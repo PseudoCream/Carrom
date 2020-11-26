@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Wall
   - Piece
+  - Slider
+  - GameManager
   layers:
   - Default
   - TransparentFX

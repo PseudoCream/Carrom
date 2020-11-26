@@ -9,8 +9,9 @@ public class DragNShoot : MonoBehaviour
 
     public float power = 2f;
     public Rigidbody2D rb;
+    public bool canShoot;
+    public GameObject manager;
     public Prediction prediction;
-    public float xPos = 0.0f;
 
     // Min & Max power of pull (negatives allow backwards movement)
     public Vector2 minPower;
@@ -24,25 +25,19 @@ public class DragNShoot : MonoBehaviour
     private Vector3 startPoint;
     private Vector3 endPoint;
 
-    private bool canShoot;
     private bool onStriker;
-    private Vector3 pos;
+    private GameManager gameManager;
 
     private void Start()
     {
-        // Set default values
+        // Set Components
         cam = Camera.main;
         powerLine = GetComponent<DrawLine>();
+        manager = GameObject.FindGameObjectWithTag("GameManager");
+        gameManager = manager.GetComponent<GameManager>();
+        
+        // Set default values
         canShoot = true;
-    }
-
-    public void MoveXPos(float newXPos)
-    {
-        // Move x pos of striker with slider
-        xPos = newXPos;
-        pos = transform.position;
-        pos.x = xPos;
-        transform.position = pos;
     }
 
     private void Update()
@@ -87,8 +82,9 @@ public class DragNShoot : MonoBehaviour
                 rb.AddForce(power * force, ForceMode2D.Impulse);
                 powerLine.EndRender();
 
-                // Set ability to shoot again
-                //canShoot = false;
+                // Set ability to shoot again, end turn
+                canShoot = false;
+                gameManager.TurnEnd(this.gameObject);
                 onStriker = false;
             }
         }
@@ -97,5 +93,11 @@ public class DragNShoot : MonoBehaviour
     private void OnMouseEnter()
     {
         onStriker = true;
+    }
+
+    private void OnMouseExit()
+    {
+        if(!Input.GetMouseButton(0))
+            onStriker = false;
     }
 }
