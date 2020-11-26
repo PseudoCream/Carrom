@@ -31,6 +31,9 @@ public class GameManager : MonoBehaviour
     public bool notMoving;
     private bool p_turn;
 
+    // PLayer target
+    public bool target_black;
+
     // Cam rotation
     private bool rotCam;
     private bool newTurn;
@@ -62,14 +65,17 @@ public class GameManager : MonoBehaviour
 
         // Change to Player turn
         yield return new WaitForSeconds(0.5f);
-        game_state = GameState.PLAYERTURN;
         StartCoroutine(PlayerTurn());
     }
 
 
     private IEnumerator PlayerTurn()
     {
-        // Set Slider pos to 0
+        //Set State
+        game_state = GameState.PLAYERTURN;
+
+        // Set Slider pos to 0, flip slider
+        slider.transform.Rotate(new Vector3(0, 0, 0));
         slider.value = 0;
 
         // Rotate Camera
@@ -87,7 +93,11 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator EnemyTurn()
     {
-        // Set Slider pos to 0
+        //Set State
+        game_state = GameState.ENEMYTURN;
+
+        // Set Slider pos to 0, flip slider
+        slider.transform.Rotate(new Vector3(0, 0, 180));
         slider.value = 0;
 
         // Rotate Camera
