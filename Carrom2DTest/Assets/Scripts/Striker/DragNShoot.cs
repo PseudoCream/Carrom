@@ -84,6 +84,7 @@ public class DragNShoot : MonoBehaviour
 
                 // Set ability to shoot again, end turn
                 canShoot = false;
+                //StartCoroutine(IsNotMoving());
                 gameManager.TurnEnd(this.gameObject);
                 onStriker = false;
             }
@@ -99,5 +100,27 @@ public class DragNShoot : MonoBehaviour
     {
         if(!Input.GetMouseButton(0))
             onStriker = false;
+    }
+
+    private IEnumerator IsNotMoving()
+    {
+        if(rb.IsSleeping())
+            print("Stopped Moving");
+
+        yield return null;
+        /*bool notMoving = false;
+        while(!notMoving)
+        {
+            notMoving = true;
+
+            if(!rb.IsSleeping())
+            {
+                notMoving = false;
+                yield return null;
+                break;
+            }
+        }
+
+        print("Stopped Moving");*/
     }
 }

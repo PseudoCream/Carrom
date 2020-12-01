@@ -12,10 +12,17 @@ public class Hole : MonoBehaviour
         manager = FindObjectOfType<GameManager>();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        
+        if(other.GetComponent<CarromMan>())
+        {
+            CarromMan carrom = other.GetComponent<CarromMan>();
+            manager.Pocketed(carrom.black, carrom.isQueen);
+            Destroy(other.gameObject);
+        }
+
+        Rigidbody2D rb = other.GetComponent<Rigidbody2D>();
+        rb.Sleep();
     }
 
 
