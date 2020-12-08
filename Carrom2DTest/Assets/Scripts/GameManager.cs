@@ -11,9 +11,10 @@ public struct Player { public int tar_count; public int points; }
 
 public class GameManager : MonoBehaviour
 {
-    // Game States
+    // Game States & Player
     public GameState game_state;
-    //public TurnState turn_state;
+    private Player p1 = new Player();
+    private Player p2 = new Player();
 
     // Get Player Striker prefab
     public GameObject striker_P1;
@@ -34,15 +35,12 @@ public class GameManager : MonoBehaviour
     // Current Player turn & board movement
     public bool notMoving;
     private bool p_turn;
-    Player p1 = new Player();
-    Player p2 = new Player();
 
     // PLayer target
     public int target;
 
     // Pieces
     private Pieces pieces;
-    private Queue<int> carromQ;
     private bool non_target = false;
     private bool pock_queen = false;
     private bool queen_cover = false;
@@ -53,21 +51,22 @@ public class GameManager : MonoBehaviour
     private bool sliderFlip;
     public float cam_rot_speed = 0.3f;
 
+    // UI
+    public GameObject Player1UI;
+    public GameObject Player2UI;
+
     // Start is called before the first frame update
     void Start()
     {
         game_state = GameState.START;
-        //turn_state = TurnState.START;
         slider = FindObjectOfType(typeof(Slider)) as Slider;
         pieces = FindObjectOfType(typeof(Pieces)) as Pieces;
         cam = Camera.main;
         StartCoroutine(SetupBoard());
-        //Quaternion.Euler(0, 0, 0);
-        carromQ = new Queue<int>();
         sliderFlip = false;
 
         p1.tar_count = 9;
-        p2.tar_count = 9;
+        p2.tar_count = 2;
         p1.points = 0;
         p2.points = 0;
     }
@@ -82,9 +81,6 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator SetupBoard()
     {
-        // Setup Carrom pieces
-
-
         // Change to Player turn
         yield return new WaitForSeconds(0.5f);
         PlayerTurn();
@@ -152,14 +148,7 @@ public class GameManager : MonoBehaviour
         StartCoroutine(CheckMoving(striker));
 
         /* TODO */
-        // Check for queen, if no consecutive pocket, return to board
         // Check for pocketed pieces, if last piece, set to won
-        // If last piece, check pocketed queen, if not return piece to board
-        // Set turn to pocketers turn
-        // If no pockets, no movement, change turn to next player
-        /* TODO */
-
-
     }
 
     public void Pocketed(bool black, bool isQueen)
@@ -192,7 +181,12 @@ public class GameManager : MonoBehaviour
                     }
                     else if (p1.tar_count <= 1)
                     {
-                        // PLayer loses
+                        if (!queen_cover || !pock_queen)
+                        {
+                            LossState();
+                        }
+                        else
+                            WinState();
                     }
                 }
                 else
@@ -205,13 +199,26 @@ public class GameManager : MonoBehaviour
                     }
                     else if(p2.tar_count <= 1)
                     {
-                        // PLayer loses
+                        if (!queen_cover || !pock_queen)
+                        {
+                            LossState();
+                        }
+                        else
+                            WinState();
                     }
                 }
 
                 if (pock_queen)
                 {
                     queen_cover = true;
+
+                    if (game_state == GameState.PLAYERTURN)
+                        if (p1.tar_count <= 1)
+                            WinState();
+                        else
+                        if (p2.tar_count <= 1)
+                            WinState();
+
                     print("COVER QUEEN");
                 }
             }
@@ -238,9 +245,28 @@ public class GameManager : MonoBehaviour
                     pieces.SpawnQueen();
                 }
             }
-            carromQ.Enqueue(carromType);
             print(p_turn);
         }
+    }
+
+    private void WinState()
+    {
+        camRotation = Quaternion.Euler(0, 0, 0);
+
+        if (p_turn)
+            Player2UI.SetActive(true);
+        else
+            Player1UI.SetActive(true);
+    }
+
+    private void LossState()
+    {
+        camRotation = Quaternion.Euler(0, 0, 0);
+
+        if (p_turn)
+            Player1UI.SetActive(true);
+        else
+            Player2UI.SetActive(true);
     }
 
     private IEnumerator CheckMoving(GameObject striker)
@@ -272,14 +298,8 @@ public class GameManager : MonoBehaviour
             Destroy(striker);
 
         if (p_turn)
-        {
-            print("ENEMY TURN");
             EnemyTurn();
-        }
         else
-        {
-            print(p_turn);
             PlayerTurn();
-        }
     }
 }
