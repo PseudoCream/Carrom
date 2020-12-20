@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class DragNShoot : MonoBehaviour
 {
@@ -28,7 +27,13 @@ public class DragNShoot : MonoBehaviour
     private Vector3 endPoint;
 
     private bool onStriker;
+    private CircleCollider2D col;
+    private SpriteRenderer rend;
     private GameManager gameManager;
+
+    // Player Slider checks
+    public bool onSlider;
+    private bool validSpot;
 
     private void Start()
     {
@@ -37,9 +42,13 @@ public class DragNShoot : MonoBehaviour
         powerLine = GetComponent<DrawLine>();
         manager = GameObject.FindGameObjectWithTag("GameManager");
         gameManager = manager.GetComponent<GameManager>();
+        col = this.GetComponent<CircleCollider2D>();
+        rend = this.GetComponent<SpriteRenderer>();
         
         // Set default values
         canShoot = true;
+        validSpot = true;
+        onSlider = false;
     }
 
     private void Update()
@@ -48,8 +57,16 @@ public class DragNShoot : MonoBehaviour
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Input.mousePosition);
         Debug.DrawRay(transform.position, cam.ScreenToWorldPoint(Input.mousePosition), Color.white);
 
-        if (canShoot && onStriker)
+        if(onSlider)
         {
+            col.isTrigger = true;
+        }
+
+        if (canShoot && onStriker && validSpot)
+        {
+            onSlider = false;
+            col.isTrigger = false;
+
             /* #################### Touch Controls #################### */
             // Get Touch 
             if (Input.touchCount > 0)
@@ -57,17 +74,17 @@ public class DragNShoot : MonoBehaviour
                 touch = Input.GetTouch(0);
 
                 // Start of touch drag...
-                if(touch.phase == TouchPhase.Began)
+                if (touch.phase == TouchPhase.Began)
                 {
                     DragStart();
                 }
                 // While dragging across screen...
-                if(touch.phase == TouchPhase.Moved)
+                if (touch.phase == TouchPhase.Moved)
                 {
                     Drag();
                 }
                 // When released.
-                if(touch.phase == TouchPhase.Ended)
+                if (touch.phase == TouchPhase.Ended)
                 {
                     DragEnd();
                 }
@@ -142,5 +159,17 @@ public class DragNShoot : MonoBehaviour
     {
         if(!Input.GetMouseButton(0))
             onStriker = false;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        validSpot = false;
+        rend.color = new Vector4(1, 0, 0, 1);
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        validSpot = true;
+        rend.color = new Vector4(1, 1, 1, 1);
     }
 }

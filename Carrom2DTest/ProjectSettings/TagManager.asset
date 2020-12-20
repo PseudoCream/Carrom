@@ -8,6 +8,8 @@ TagManager:
   - Piece
   - Slider
   - GameManager
+  - WhiteCount
+  - BlackCount
   layers:
   - Default
   - TransparentFX

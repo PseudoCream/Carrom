@@ -54,21 +54,32 @@ public class GameManager : MonoBehaviour
     // UI
     public GameObject Player1UI;
     public GameObject Player2UI;
+    public GameObject QueenActive;
+    public GameObject Buttons;
+    private Text w_count;
+    private Text b_count;
 
     // Start is called before the first frame update
     void Start()
     {
-        game_state = GameState.START;
+        cam = Camera.main;
+
         slider = FindObjectOfType(typeof(Slider)) as Slider;
         pieces = FindObjectOfType(typeof(Pieces)) as Pieces;
-        cam = Camera.main;
+
+        w_count = GameObject.FindGameObjectWithTag("WhiteCount").GetComponent<Text>();
+        b_count = GameObject.FindGameObjectWithTag("BlackCount").GetComponent<Text>();
+
+        game_state = GameState.START;
         StartCoroutine(SetupBoard());
+
         sliderFlip = false;
 
-        p1.tar_count = 9;
+        p1.tar_count = 1;
         p2.tar_count = 2;
         p1.points = 0;
         p2.points = 0;
+        UpdateScore();
     }
 
 
@@ -93,6 +104,8 @@ public class GameManager : MonoBehaviour
         game_state = GameState.PLAYERTURN;
         target = 1;
         non_target = false;
+
+        slider.gameObject.SetActive(true);
 
         // Set Slider pos to 0, flip slider
         if (sliderFlip)
@@ -121,6 +134,8 @@ public class GameManager : MonoBehaviour
         target = 0;
         non_target = false;
 
+        slider.gameObject.SetActive(true);
+
         // Set Slider pos to 0, flip slider
         if (!sliderFlip)
         {
@@ -144,11 +159,9 @@ public class GameManager : MonoBehaviour
     public void TurnEnd(GameObject striker)
     {
         print("TurnEND");
+        slider.gameObject.SetActive(false);
         // Check all pieces have stopped moving
         StartCoroutine(CheckMoving(striker));
-
-        /* TODO */
-        // Check for pocketed pieces, if last piece, set to won
     }
 
     public void Pocketed(bool black, bool isQueen)
@@ -220,6 +233,7 @@ public class GameManager : MonoBehaviour
                             WinState();
 
                     print("COVER QUEEN");
+                    QueenActive.SetActive(false);
                 }
             }
             else if(!(target == carromType))
@@ -247,39 +261,50 @@ public class GameManager : MonoBehaviour
             }
             print(p_turn);
         }
+        UpdateScore();
+    }
+
+    private void UpdateScore()
+    {
+        w_count.text = "" + p1.tar_count;
+        b_count.text = "" + p2.tar_count;
     }
 
     private void WinState()
     {
         camRotation = Quaternion.Euler(0, 0, 0);
-
+        UpdateScore();
         if (p_turn)
             Player2UI.SetActive(true);
         else
             Player1UI.SetActive(true);
+
+        Buttons.SetActive(true);
     }
 
     private void LossState()
     {
         camRotation = Quaternion.Euler(0, 0, 0);
-
+        UpdateScore();
         if (p_turn)
             Player1UI.SetActive(true);
         else
             Player2UI.SetActive(true);
+
+        Buttons.SetActive(true);
     }
 
     private IEnumerator CheckMoving(GameObject striker)
     {
         //yield return new WaitForSeconds(2.0f);
-        Rigidbody2D[] pieces = FindObjectsOfType<Rigidbody2D>();
+        Rigidbody2D[] _pieces = FindObjectsOfType<Rigidbody2D>();
         notMoving = false; 
 
         while(!notMoving)
         {
             notMoving = true;
 
-            foreach(Rigidbody2D piece in pieces)
+            foreach(Rigidbody2D piece in _pieces)
             {
                 if(piece)
                 {
@@ -296,6 +321,12 @@ public class GameManager : MonoBehaviour
         print("All Objects Stopped");
         if (striker)
             Destroy(striker);
+
+       /* if (pock_queen && !queen_cover)
+        {
+            pieces.SpawnQueen();
+            pock_queen = false;
+        }*/
 
         if (p_turn)
             EnemyTurn();

@@ -7,6 +7,8 @@ public class Pieces : MonoBehaviour
     // pieces (excluding Strikers)
     public Transform parent;
     public GameObject cm_Prefab;
+    public SpriteRenderer sRenderer;
+    public Sprite[] sprite = new Sprite[2];
     public Transform[] locations = new Transform[19];
 
     private GameObject[] pieces = new GameObject[19];
@@ -22,15 +24,22 @@ public class Pieces : MonoBehaviour
         {
             pieces[i] = Instantiate(cm_Prefab, locations[i+1].position, locations[i+1].rotation, parent);
             cm = pieces[i].gameObject.GetComponent<CarromMan>();
+            sRenderer = pieces[i].gameObject.GetComponent<SpriteRenderer>();
             if (i % 2 == 0)
             {
-                cm.SetColour(black);
+                //cm.SetColour(black);
+                sRenderer.sprite = sprite[1];
                 cm.black = true;
+                if (i > 2)
+                    Destroy(pieces[i].gameObject);
             }
             else
             {
-                cm.SetColour(white);
+                //cm.SetColour(white);
+                sRenderer.sprite = sprite[0];
                 cm.black = false;
+                if(i > 2)
+                    Destroy(pieces[i].gameObject);
             }
         }
     }

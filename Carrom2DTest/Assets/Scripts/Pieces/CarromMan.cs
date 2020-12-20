@@ -14,6 +14,9 @@ public class CarromMan : MonoBehaviour
     private Vector4 defaultColour;
     private float speed;
 
+    public AudioClip col_sound;
+    public float col_volume;
+
     private void Awake()
     {
         rend = this.gameObject.GetComponent<SpriteRenderer>();
@@ -28,20 +31,10 @@ public class CarromMan : MonoBehaviour
             SetColour(new Vector4(1, 0, 0, 1));
     }
 
-    /*private void Update()
+    private void OnCollisionEnter2D(Collision2D other)
     {
-        speed = rb.velocity.magnitude;
-        if(speed > (deceleration * Time.deltaTime))
-        {
-            speed = speed - (deceleration * Time.deltaTime);
-        }
-        else if(speed < -deceleration * Time.deltaTime)
-            speed = speed + deceleration * Time.deltaTime;
-        else
-            speed = 0;
-
-        rb.velocity = new Vector3(rb.velocity.x + speed, rb.velocity.y + speed);
-    }*/
+        AudioSource.PlayClipAtPoint(col_sound, this.gameObject.transform.position, col_volume);
+    }
 
     public void SetColour(Vector4 colour) { rend.color = colour; }
     public void SetPoints(int point) { points = point; }
